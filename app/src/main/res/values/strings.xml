@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">My First App</string>
+    <string name="edit_message">http://210.74.194.118:8082/gw-web-manager/gws/sysLogin?authToken=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2</string>
+    <string name="btn_send">send</string>
+</resources>
