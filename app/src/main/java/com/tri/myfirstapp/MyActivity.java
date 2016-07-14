@@ -8,9 +8,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class MyActivity extends AppCompatActivity {
-
-    public final static String EXTRA_MESSAGE = "com.tri.myfirstapp.extra_msg";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +18,11 @@ public class MyActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DisplayMessageActivity.class);
         EditText editText = (EditText) findViewById(R.id.text_id);
         String msg = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, "http://210.74.194.118:8082/gw-web-manager/gws/sysLogin?authToken=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2");
+        intent.putExtra("url", "http://210.74.194.118:8082/gw-web-manager/gws/fileExpressList");
+        intent.putExtra("token", "eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2fDE0NjY2NjQ1ODUwMzI");
+        intent.putExtra("pageNum", "1");
+        intent.putExtra("pageSize", "-1");
+        intent.putExtra("status", "1");
         startActivity(intent);
 
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
