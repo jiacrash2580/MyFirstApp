@@ -1,18 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
-
-    <EditText android:id="@+id/text_id"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:hint="@string/edit_message" />
-    <Button
-        android:id="@+id/btnSend"
+    android:background="@drawable/login_background">
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_send"
-        android:onClick="btnClick"/>
-</LinearLayout>
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:paddingBottom="100dp">
+        <ImageView
+            android:layout_width="325dp"
+            android:layout_height="100dp"
+            android:src="@drawable/logo1"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/colorText"
+            android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/logo2"
+                android:layout_marginLeft="8dp"/>
+            <EditText
+                android:id="@+id/txtAccount"
+                android:layout_width="292dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/colorText"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/logo3"
+                android:layout_marginLeft="8dp"/>
+            <EditText
+                android:id="@+id/txtPassword"
+                android:layout_width="292dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="325dp"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_login"
+            android:textSize="22dp"
+            android:background="@drawable/login_btn"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+</RelativeLayout>

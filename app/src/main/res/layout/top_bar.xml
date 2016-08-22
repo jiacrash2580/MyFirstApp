@@ -30,12 +30,7 @@
 			android:background="@drawable/radiobutton_annot"
    			android:id="@+id/radio_annot"
    			style="@style/bar"/>
-  		
-   	    <RadioButton
-   	        android:id="@+id/radio_otherfunctions"
-   	        style="@style/bar"
-   	        android:layout_weight="1"
-   	        android:background="@drawable/radiobutton_otherfunctions" />
+
    	</RadioGroup>
     
 </RelativeLayout>

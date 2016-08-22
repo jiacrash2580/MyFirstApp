@@ -1,7 +1,6 @@
 package fragment;
 
 import android.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,17 +8,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.infrastructure.net.DefaultThreadPool;
+import com.infrastructure.net.HttpRequest;
+import com.infrastructure.net.RequestParameter;
+import com.infrastructure.net.URLData;
+import com.infrastructure.net.UrlConfigManager;
 import com.tri.myfirstapp.R;
-import com.tri.myfirstapp.util.SmartUtil;
 
-import org.apache.commons.lang3.StringUtils;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import activity.DisplayMessageActivity;
 
 /**
  * Created by aaa on 2016/7/28.
@@ -43,51 +46,31 @@ public class ListMessage extends Fragment {
         });
 
         Bundle args = getArguments();
-        String url = args.getString("url");
         String token = args.getString("token");
         String pageNum = args.getString("pageNum");
         String pageSize = args.getString("pageSize");
         String status = args.getString("status");
-        new loginAsyncTask().execute(url, token, pageNum, pageSize, status);
 
-        return view;
-    }
-
-    class loginAsyncTask extends AsyncTask<String, Integer, Map<String, String>> {
-        @Override
-        protected Map<String, String> doInBackground(String... arg)
-        {
-            try
+        //发请求，接收结果并处理返回
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("token", token);
+        params.put("pageNum", pageNum);
+        params.put("pageSize", pageSize);
+        params.put("status", status);
+        final DisplayMessageActivity parentActivity = ((DisplayMessageActivity)getActivity());
+        final URLData urlData = UrlConfigManager.findURL(parentActivity, "fileExpressList");
+        HttpRequest request = parentActivity.getRequestManager().createRequest(urlData, params, parentActivity.new AbstractRequestCallback() {
+            @Override
+            public void onSuccess(String content)
             {
-                Map params = new HashMap();
-                params.put("token", arg[1]);
-                params.put("pageNum", arg[2]);
-                params.put("pageSize", arg[3]);
-                params.put("status", arg[4]);
-                return SmartUtil.httpGet(arg[0], params, getActivity());
-            } catch (Exception e)
-            {
-                Map<String, String> result = new HashMap<String, String>();
-                result.put("msg", "参数异常！");
-                result.put("ret", "error");
-                return result;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Map<String, String> result)
-        {
-            if (StringUtils.equals("ok", result.get("ret")))
-            {
-                Map reObj = JSON.parseObject(result.get("msg"), Map.class);
-                infoList = (List<Map<String, String>>) reObj.get("fileExpList");
+                Map result = JSON.parseObject(content, Map.class);
+                infoList = (List<Map<String, String>>) result.get("fileExpList");
                 SimpleAdapter sa = new SimpleAdapter(getActivity(), infoList, R.layout.listview_item, new String[]{"TITLE", "LEADERID", "SENDTIME"}, new int[]{R.id.tv1, R.id.tv2, R.id.tv3});
                 list.setAdapter(sa);
-            } else if (StringUtils.equals("error", result.get("ret")))
-            {
-                Toast.makeText(getActivity(), result.get("msg"), Toast.LENGTH_SHORT).show();
             }
-        }
+        }, true);
+        DefaultThreadPool.getInstance().execute(request);
+        return view;
     }
 
     public interface ItemClickCallBack {

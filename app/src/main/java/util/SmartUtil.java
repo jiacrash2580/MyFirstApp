@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class SmartUtil {
         {
             URL realUrl = new URL(urlPath);
             // 打开和URL之间的连接
-            URLConnection conn = realUrl.openConnection();
+            HttpURLConnection conn = (HttpURLConnection)realUrl.openConnection();
             // 设置通用的请求属性
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");

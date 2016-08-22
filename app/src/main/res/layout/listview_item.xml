@@ -1,44 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="160dp"
+             android:layout_height="60dp"
     android:stretchColumns="1">
     <TableRow android:layout_weight="1">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/itemTitle"
-            android:textSize="30dp"/>
+            android:text="@string/itemTitle"/>
         <TextView
             android:id="@+id/tv1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_span="3"
             android:maxLines="2"
-            android:ellipsize="end"
-            android:textSize="30dp"/>
+            android:ellipsize="end"/>
     </TableRow>
     <TableRow android:layout_weight="1"
         android:gravity="bottom">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/itemLeader"
-                android:textSize="30dp"/>
+                android:text="@string/itemLeader"/>
             <TextView
                 android:id="@+id/tv2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="30dp"/>
+                android:layout_height="wrap_content"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/itemTime"
-                android:textSize="30dp"/>
+                android:text="@string/itemTime"/>
             <TextView
                 android:id="@+id/tv3"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="30dp"/>
+                android:layout_height="wrap_content"/>
     </TableRow>
 </TableLayout>

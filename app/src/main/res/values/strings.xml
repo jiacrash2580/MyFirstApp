@@ -1,8 +1,23 @@
 <resources>
-    <string name="app_name">My First App</string>
-    <string name="edit_message">http://210.74.194.118:8082/gw-web-manager/gws/sysLogin?authToken=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2</string>
-    <string name="btn_send">send</string>
+    <string name="server_url">http://210.74.194.118:8082/gw-web-manager/gws/</string>
+    <string name="app_name">北京市发改委移动办公平台</string>
+    <string name="btn_login">登录</string>
     <string name="itemTitle">文件标题:</string>
     <string name="itemLeader">待阅领导:</string>
     <string name="itemTime">发送时间:</string>
+    <string name="shouye">首页</string>
+    <string name="wenjian_sudi">文件速递</string>
+    <string name="xgmm">修改密码</string>
+    <string name="gy">关于</string>
+    <string name="password_hint">Please input password</string>
+    <string name="password_dialog_title">Password</string>
+    <string name="pwd_dialog_bnt_cancel">Cancel</string>
+    <string name="pwd_dialog_bnt_ok">OK</string>
+    <string name="search_back">Back</string>
+    <string name="search_hint">Please enter text to search</string>
+    <string name="save">Save</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="editwindow_textview">Edit Window</string>
+    <string name="ok">Save</string>
 </resources>

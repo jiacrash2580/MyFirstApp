@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<url xmlns:android="http://schemas.android.com/apk/res/android">
+    <Node
+        Key="sysLogin"
+        Expires="300"
+        NetType="get"
+        Url="http://210.74.194.118:8082/gw-web-manager/gws/sysLogin" />
 
-</PreferenceScreen>
+    <Node
+        Key="fileExpressList"
+        Expires="300"
+        NetType="get"
+        Url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressList" />
+
+    <Node
+        Key="fileExpressView"
+        Expires="300"
+        NetType="get"
+        Url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressView" />
+
+</url>

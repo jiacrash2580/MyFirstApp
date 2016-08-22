@@ -2,28 +2,34 @@ package fragment;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.infrastructure.net.DefaultThreadPool;
+import com.infrastructure.net.HttpRequest;
+import com.infrastructure.net.RequestParameter;
+import com.infrastructure.net.URLData;
+import com.infrastructure.net.UrlConfigManager;
 import com.tri.myfirstapp.R;
-import activity.PdfViewActivity;
-import com.tri.myfirstapp.util.SmartUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import activity.DisplayMessageActivity;
+import activity.PdfViewActivity;
 
 /**
  * Created by aaa on 2016/7/28.
@@ -35,7 +41,8 @@ public class DetailMessage extends Fragment {
     private TextView tvSyPeople = null;
     private TextView tvSyTime = null;
     private TextView tvContent = null;
-    private ViewGroup fileContainer = null;
+    private GridView attachGridView = null;
+    private List<Map> attachsList = null;
 
     @Nullable
     @Override
@@ -48,41 +55,24 @@ public class DetailMessage extends Fragment {
         tvSyPeople = (TextView) view.findViewById(R.id.tvSyPeople);
         tvSyTime = (TextView) view.findViewById(R.id.tvSyTime);
         tvContent = (TextView) view.findViewById(R.id.tvContent);
-        fileContainer = (ViewGroup) view.findViewById(R.id.fileContainer);
+        attachGridView = (GridView) view.findViewById(R.id.attachGridView);
 
         Bundle args = getArguments();
         String id = args.getString("id");
-        new detailAsyncTask().execute(id);
-        return view;
-    }
 
-    class detailAsyncTask extends AsyncTask<String, Integer, Map<String, String>> {
-        @Override
-        protected Map<String, String> doInBackground(String... arg)
-        {
-            try
+        //发请求，接收结果并处理返回
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("token", "bHV5YW58NzZEODAyMjQ2MTFGQzkxOUE1RDU0RjBGRjlGQkE0NDZ8MTQ2NjY2NDUyMzY3MA");
+        params.put("id", id);
+        final DisplayMessageActivity parentActivity = ((DisplayMessageActivity)getActivity());
+        final URLData urlData = UrlConfigManager.findURL(parentActivity, "fileExpressView");
+        HttpRequest request = parentActivity.getRequestManager().createRequest(urlData, params, parentActivity.new AbstractRequestCallback() {
+            @Override
+            public void onSuccess(String content)
             {
-                Map params = new HashMap();
-                params.put("id", arg[0]);
-                return SmartUtil.httpPost("http://210.74.194.118:8082/gw-web-manager/gws/fileExpressView?token=bHV5YW58NzZEODAyMjQ2MTFGQzkxOUE1RDU0RjBGRjlGQkE0NDZ8MTQ2NjY2NDUyMzY3MA", params);
-            } catch (Exception e)
-            {
-                Map<String, String> result = new HashMap<String, String>();
-                result.put("msg", "参数异常！");
-                result.put("ret", "error");
-                return result;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Map<String, String> result)
-        {
-            if (StringUtils.equals("ok", result.get("ret")))
-            {
-                String msgStr = result.get("msg");
-                if (StringUtils.isNotBlank(msgStr))
+                if (StringUtils.isNotBlank(content))
                 {
-                    Map msg = JSON.parseObject(msgStr, Map.class);
+                    Map msg = JSON.parseObject(content, Map.class);
                     Map form = (Map) msg.get("fileExpressForm");
                     //表单赋值
                     tvTitle.setText((String) form.get("TITLE"));
@@ -92,42 +82,103 @@ public class DetailMessage extends Fragment {
                     tvSyTime.setText((String) form.get("SENDTIME"));
                     tvContent.setText((String) form.get("CONTENT"));
                     //生成附件按钮
-                    List<Map> attachs = (List<Map>) msg.get("fileExpressAttachs");
-                    if (!attachs.isEmpty())
-                    {
-                        for (Map file : attachs)
+                    attachsList = (List<Map>) msg.get("fileExpressAttachs");
+
+                    attachGridView.setAdapter(new attachButtonAdapter());
+                    attachGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
                         {
-                            String ext = (String) file.get("EXTENSION");
-                            if (StringUtils.equalsIgnoreCase(ext, "pdf"))
-                            {
-                                ImageButton ib = new ImageButton(getActivity());
-                                ib.setImageResource(R.drawable.pdf);
-                                ib.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) fileContainer.getLayoutParams();
-                                lp.width = SmartUtil.dip2px(getActivity(), 80);
-                                lp.height = SmartUtil.dip2px(getActivity(), 80);
-                                ib.setLayoutParams(lp);
-                                ib.setTag(file);
-                                ib.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v)
-                                    {
-                                        String fileId = (String) ((Map) v.getTag()).get("ATTACHID");
-                                        String url = "http://210.74.194.118:8082/gw-web-manager/gws/fileExpressAttachDown?token=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2fDE0NjY2NjQ1ODUwMzI&fileId=" + fileId;
-                                        Intent intent = new Intent(getActivity(), PdfViewActivity.class);
-                                        intent.putExtra("url", url);
-                                        startActivity(intent);
-                                    }
-                                });
-                                fileContainer.addView(ib);
-                            }
+                            String fileId = (String) attachsList.get(position).get("ATTACHID");
+                            String url = getResources().getString(R.string.server_url) + "fileExpressAttachDown?token=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2fDE0NjY2NjQ1ODUwMzI&fileId=" + fileId;
+                            Intent intent = new Intent(getActivity(), PdfViewActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
                         }
-                    }
+                    });
                 }
-            } else if (StringUtils.equals("error", result.get("ret")))
-            {
-                Toast.makeText(getActivity(), result.get("msg"), Toast.LENGTH_SHORT).show();
             }
+        }, false);
+        DefaultThreadPool.getInstance().execute(request);
+        return view;
+    }
+
+    class attachButtonAdapter extends BaseAdapter {
+        @Override
+        public int getCount()
+        {
+            if (attachsList != null)
+            {
+                return attachsList.size();
+            } else
+            {
+                return 0;
+            }
+        }
+
+        @Override
+        public Object getItem(int position)
+        {
+            return attachsList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position)
+        {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
+            View view;
+            ViewHolder holder;
+            if (convertView == null)
+            {
+                view = LayoutInflater.from(getContext()).inflate(R.layout.attach_adapter, parent, false);
+                holder = new ViewHolder();
+                holder.attachmentIcon = (ImageView) view.findViewById(R.id.attachment_icon);
+                holder.attachmentName = (TextView) view.findViewById(R.id.attachment_name);
+                view.setTag(holder);
+            } else
+            {
+                view = convertView;
+                holder = (ViewHolder) view.getTag();
+            }
+            Map attachment = (Map) getItem(position);
+            holder.attachmentName.setText((String) attachment.get("TITLENAME"));
+
+            String extension = (String) attachment.get("EXTENSION");
+            if (StringUtils.containsIgnoreCase(extension, "doc"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.doc);
+            } else if (StringUtils.containsIgnoreCase(extension, "pdf"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.pdf);
+            } else if (StringUtils.containsIgnoreCase(extension, "xls"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.xls);
+            } else if (StringUtils.containsIgnoreCase(extension, "ppt"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.ppt);
+            } else if (StringUtils.containsIgnoreCase(extension, "bmp"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.bmp);
+            } else if (StringUtils.containsIgnoreCase(extension, "jpg"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.jpg);
+            } else if (StringUtils.containsIgnoreCase(extension, "png"))
+            {
+                holder.attachmentIcon.setImageResource(R.drawable.png);
+            } else
+            {
+            }
+            return view;
+        }
+
+        class ViewHolder {
+            ImageView attachmentIcon;
+            TextView attachmentName;
         }
     }
 }

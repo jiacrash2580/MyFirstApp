@@ -1,40 +1,70 @@
 package activity;
 
-import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.transition.Transition;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.support.v7.app.ActionBar;
+import android.view.View;
+import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
+import com.infrastructure.activity.AppBaseActivity;
 import com.tri.myfirstapp.R;
-import com.tri.myfirstapp.fragment.DetailMessage;
-import com.tri.myfirstapp.fragment.ListMessage;
-import com.tri.myfirstapp.util.SmartUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import fragment.DetailMessage;
+import fragment.ListMessage;
 
-public class DisplayMessageActivity extends Activity implements ListMessage.ItemClickCallBack{
+public class DisplayMessageActivity extends AppBaseActivity implements ListMessage.ItemClickCallBack {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void initViews(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.display_message);
+        initCustomActionBar();
+    }
+
+    @Override
+    protected void loadData()
+    {
+        addListFragment();
+    }
+
+    private void initCustomActionBar()
+    {
+        View view = getLayoutInflater().inflate(R.layout.custom_action_bar, null);
+        view.findViewById(R.id.back_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                finish();
+            }
+        });
+        final TextView backTitle = (TextView) view.findViewById(R.id.back_title);
+        backTitle.setText(R.string.shouye);
+        backTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                finish();
+            }
+        });
+        TextView title = (TextView) view.findViewById(R.id.title);
+        title.setText(R.string.wenjian_sudi);
+
+        ActionBar.LayoutParams layout = new ActionBar.LayoutParams(
+                ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
+        ActionBar intentBar = getSupportActionBar();
+        intentBar.setCustomView(view, layout);
+        intentBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+    }
+
+    private void addListFragment()
+    {
         Intent intent = getIntent();
-        String url = intent.getStringExtra("url");
         String token = intent.getStringExtra("token");
         String pageNum = intent.getStringExtra("pageNum");
         String pageSize = intent.getStringExtra("pageSize");
         String status = intent.getStringExtra("status");
         Bundle args = new Bundle();
-        args.putString("url", url);
         args.putString("token", token);
         args.putString("pageNum", pageNum);
         args.putString("pageSize", pageSize);
