@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+ 	xmlns:android="http://schemas.android.com/apk/res/android"
+ 	android:layout_width="fill_parent"
+ 	android:layout_height="wrap_content"
+  	android:orientation="vertical"
+  	android:background="@color/white"
+	>
+  <TextView 
+    android:id="@+id/selector_path"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:textSize="24sp"
+    android:textColor="@android:color/black"
+  >
+  </TextView>
+
+  <ListView 
+    android:id="@android:id/list"
+    android:layout_width="fill_parent"
+    android:layout_height="300dp"
+  >
+  </ListView>
+
+  <EditText
+      android:id="@+id/selector_fileName"
+      android:layout_width="fill_parent"
+      android:layout_height="40dp"
+      android:singleLine="true">
+  </EditText>
+  
+  <LinearLayout 
+    android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	>
+	<Button     
+    android:id="@+id/selector_confirm"  
+    android:layout_width="0dp"    
+    android:layout_height="fill_parent"    
+    android:text="@string/confirm"
+    android:layout_weight="1"  
+    />
+    <Button     
+    android:id="@+id/selector_cancel"  
+    android:layout_width="0dp"    
+    android:layout_height="fill_parent"    
+    android:text="@string/cancel"
+    android:layout_weight="1"  
+    />	
+  </LinearLayout>
+  
+</LinearLayout>
+

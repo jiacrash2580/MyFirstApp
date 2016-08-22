@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#c0000000"
+    >
+
+   	<RadioGroup
+   	    android:id="@+id/toolbar_top"
+		android:background="@drawable/fm_toolbar_blue"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:layout_gravity="top">
+   		<RadioButton 
+			android:background="@drawable/radiobutton_rotate"
+ 			android:id="@+id/radio_rotate"
+ 			style="@style/bar"/>
+   		<RadioButton 
+			android:background="@drawable/radiobutton_zoomout"
+   			android:id="@+id/radio_zoomOut"
+   			style="@style/bar"/>
+   		<RadioButton 
+			android:background="@drawable/radiobutton_zoomin"
+   			android:id="@+id/radio_zoomIn"
+   			style="@style/bar"/>
+  		<RadioButton 
+			android:background="@drawable/radiobutton_annot"
+   			android:id="@+id/radio_annot"
+   			style="@style/bar"/>
+  		
+   	    <RadioButton
+   	        android:id="@+id/radio_otherfunctions"
+   	        style="@style/bar"
+   	        android:layout_weight="1"
+   	        android:background="@drawable/radiobutton_otherfunctions" />
+   	</RadioGroup>
+    
+</RelativeLayout>

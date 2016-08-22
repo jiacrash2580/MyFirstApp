@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_top_bar"
+    android:background="@drawable/fm_toolbar_blue"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <Button
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:clickable="true"
+        android:onClick="onBack"
+        android:background="@drawable/search_cancel_button"
+        android:text="@string/search_back" />
+    
+    <EditText
+    	android:id="@+id/searchText"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_toLeftOf="@id/back"
+    	android:singleLine="true"
+    	android:layout_centerVertical="true"
+    	android:drawableLeft="@drawable/rv_search_icon_normal"
+    	android:background="@drawable/search_text_shape"
+    	android:hint="@string/search_hint"/>
+
+</RelativeLayout>

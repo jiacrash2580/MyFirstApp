@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_bottom_bar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#c0000000"
+    >
+
+   	<RadioGroup
+		android:id="@+id/search_toolbar_bottom"
+		android:background="@drawable/fm_toolbar_blue"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:layout_gravity="top">
+   		<RadioButton 
+			android:background="@drawable/radiobutton_searchprev"
+   			android:id="@+id/radio_searchPrev"
+   			style="@style/bar"/>
+   		<RadioButton 
+			android:background="@drawable/radiobutton_searchnext"
+   			android:id="@+id/radio_searchNext"
+   			style="@style/bar"/>
+  		
+   	</RadioGroup>
+    
+</RelativeLayout>
