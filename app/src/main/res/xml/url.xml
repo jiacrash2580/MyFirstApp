@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <url xmlns:android="http://schemas.android.com/apk/res/android">
-    <Node
-        Key="sysLogin"
-        Expires="300"
-        NetType="get"
-        Url="http://210.74.194.118:8082/gw-web-manager/gws/sysLogin" />
+    <node
+        id="sysLogin"
+        netType="get"
+        url="http://210.74.194.118:8082/gw-web-manager/gws/sysLogin" />
 
-    <Node
-        Key="fileExpressList"
-        Expires="300"
-        NetType="get"
-        Url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressList" />
+    <node
+        id="fileExpressList"
+        netType="get"
+        url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressList" />
 
-    <Node
-        Key="fileExpressView"
-        Expires="300"
-        NetType="get"
-        Url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressView" />
+    <node
+        id="fileExpressView"
+        netType="get"
+        url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressView" />
 
+    <node
+        id="fileExpressAttachDown"
+        netType="get"
+        url="http://210.74.194.118:8082/gw-web-manager/gws/fileExpressAttachDown" />
 </url>

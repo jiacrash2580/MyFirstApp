@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, DisplayMessageActivity.class);
-                intent.putExtra("token", "eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2fDE0NjY2NjQ1ODUwMzI");
                 intent.putExtra("pageNum", "1");
                 intent.putExtra("pageSize", "-1");
                 intent.putExtra("status", "1");

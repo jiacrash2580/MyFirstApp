@@ -2,29 +2,30 @@ package activity;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.infrastructure.activity.AppBaseActivity;
 import com.tri.myfirstapp.R;
 
 import fragment.DetailMessage;
 import fragment.ListMessage;
 
-public class DisplayMessageActivity extends AppBaseActivity implements ListMessage.ItemClickCallBack {
+public class DisplayMessageActivity extends AppCompatActivity implements ListMessage.ItemClickCallBack {
+
+    public SharedPreferences sp = null;
 
     @Override
-    protected void initViews(Bundle savedInstanceState)
+    protected void onCreate(@Nullable Bundle savedInstanceState)
     {
+        super.onCreate(savedInstanceState);
+        sp = getSharedPreferences("global", LoginActivity.MODE_PRIVATE);
         setContentView(R.layout.display_message);
         initCustomActionBar();
-    }
-
-    @Override
-    protected void loadData()
-    {
         addListFragment();
     }
 
@@ -60,12 +61,10 @@ public class DisplayMessageActivity extends AppBaseActivity implements ListMessa
     private void addListFragment()
     {
         Intent intent = getIntent();
-        String token = intent.getStringExtra("token");
         String pageNum = intent.getStringExtra("pageNum");
         String pageSize = intent.getStringExtra("pageSize");
         String status = intent.getStringExtra("status");
         Bundle args = new Bundle();
-        args.putString("token", token);
         args.putString("pageNum", pageNum);
         args.putString("pageSize", pageSize);
         args.putString("status", status);

@@ -32,8 +32,11 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
     compile 'commons-codec:commons-codec:20041127.091804'
     compile files('libs/fsdk_android.jar')
-    compile project(':androidLib285')
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'com.alibaba:fastjson:1.2.16'
 }

@@ -1,9 +1,11 @@
 package fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,24 +14,34 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.infrastructure.net.DefaultThreadPool;
-import com.infrastructure.net.HttpRequest;
-import com.infrastructure.net.RequestParameter;
-import com.infrastructure.net.URLData;
-import com.infrastructure.net.UrlConfigManager;
 import com.tri.myfirstapp.R;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import activity.DisplayMessageActivity;
 import activity.PdfViewActivity;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
+import util.SmartUtil;
+import util.UrlConfigManager;
 
 /**
  * Created by aaa on 2016/7/28.
@@ -43,6 +55,8 @@ public class DetailMessage extends Fragment {
     private TextView tvContent = null;
     private GridView attachGridView = null;
     private List<Map> attachsList = null;
+    private CompositeSubscription mCompositeSubscription = new CompositeSubscription();
+    private String token = null;
 
     @Nullable
     @Override
@@ -56,51 +70,159 @@ public class DetailMessage extends Fragment {
         tvSyTime = (TextView) view.findViewById(R.id.tvSyTime);
         tvContent = (TextView) view.findViewById(R.id.tvContent);
         attachGridView = (GridView) view.findViewById(R.id.attachGridView);
+        token = ((DisplayMessageActivity) getActivity()).sp.getString("token", "");
 
-        Bundle args = getArguments();
-        String id = args.getString("id");
+        loadDataDetail();
 
-        //发请求，接收结果并处理返回
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("token", "bHV5YW58NzZEODAyMjQ2MTFGQzkxOUE1RDU0RjBGRjlGQkE0NDZ8MTQ2NjY2NDUyMzY3MA");
-        params.put("id", id);
-        final DisplayMessageActivity parentActivity = ((DisplayMessageActivity)getActivity());
-        final URLData urlData = UrlConfigManager.findURL(parentActivity, "fileExpressView");
-        HttpRequest request = parentActivity.getRequestManager().createRequest(urlData, params, parentActivity.new AbstractRequestCallback() {
-            @Override
-            public void onSuccess(String content)
-            {
-                if (StringUtils.isNotBlank(content))
+//        test12306();
+
+        return view;
+    }
+
+
+
+    /**
+     * 测试访问自签名的https网站12306
+     */
+    private void test12306()
+    {
+        try
+        {
+            final Activity parentActivity = getActivity();
+            Observable.create(new Observable.OnSubscribe<String>() {
+                @Override
+                public void call(final Subscriber<? super String> subscriber)
                 {
-                    Map msg = JSON.parseObject(content, Map.class);
-                    Map form = (Map) msg.get("fileExpressForm");
-                    //表单赋值
-                    tvTitle.setText((String) form.get("TITLE"));
-                    tvYjLeader.setText((String) form.get("LEADERID"));
-                    tvYjTime.setText((String) form.get("READTIME"));
-                    tvSyPeople.setText((String) form.get("SENDER"));
-                    tvSyTime.setText((String) form.get("SENDTIME"));
-                    tvContent.setText((String) form.get("CONTENT"));
-                    //生成附件按钮
-                    attachsList = (List<Map>) msg.get("fileExpressAttachs");
-
-                    attachGridView.setAdapter(new attachButtonAdapter());
-                    attachGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    try
+                    {
+                        InputStream is = parentActivity.getResources().openRawResource(R.raw.kyfw12306);
+                        Call call = SmartUtil.okHttpsPost("https://kyfw.12306.cn/otn/", null, is);
+                        subscriber.add(new SmartUtil.Subscription(call));
+                        call.enqueue(new SmartUtil.Callback(subscriber) {
+                            @Override
+                            public void onResponse(Response response) throws IOException
+                            {
+                                subscriber.onNext(response.body().string());
+                            }
+                        });
+                    } catch (Exception e)
+                    {
+                        subscriber.onError(e);
+                    }
+                }
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<String>() {
                         @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+                        public void onCompleted()
                         {
-                            String fileId = (String) attachsList.get(position).get("ATTACHID");
-                            String url = getResources().getString(R.string.server_url) + "fileExpressAttachDown?token=eXVud2VpfDc2RDgwMjI0NjExRkM5MTlBNUQ1NEYwRkY5RkJBNDQ2fDE0NjY2NjQ1ODUwMzI&fileId=" + fileId;
-                            Intent intent = new Intent(getActivity(), PdfViewActivity.class);
-                            intent.putExtra("url", url);
-                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onError(Throwable e)
+                        {
+                            Toast.makeText(parentActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onNext(String body)
+                        {
+                            //body是返回页面的代码
+                            int j = 0;
                         }
                     });
+        } catch (Exception e)
+        {
+            int j = 0;
+        }
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        mCompositeSubscription.unsubscribe();
+    }
+
+    private void loadDataDetail()
+    {
+        final Activity parentActivity = getActivity();
+        mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(final Subscriber<? super String> subscriber)
+            {
+                try
+                {
+                    Bundle args = getArguments();
+                    Map<String, String> urlData = UrlConfigManager.findURL(parentActivity, "fileExpressView");
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("token", token);
+                    params.put("id", args.getString("id"));
+                    final Call call = SmartUtil.okHttpPost(urlData.get("url"), params);
+                    subscriber.add(new SmartUtil.Subscription(call));
+                    call.enqueue(new SmartUtil.Callback(subscriber) {
+                        @Override
+                        public void onResponse(Response response) throws IOException
+                        {
+                            subscriber.onNext(response.body().string());
+                        }
+                    });
+                } catch (IOException e)
+                {
+                    subscriber.onError(new Exception("网络无法连接"));
                 }
             }
-        }, false);
-        DefaultThreadPool.getInstance().execute(request);
-        return view;
+        })
+                .map(new Func1<String, Map>() {
+                    @Override
+                    public Map call(String s)
+                    {
+                        return JSON.parseObject(s, Map.class);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Map>() {
+                    @Override
+                    public void onCompleted()
+                    {
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        Toast.makeText(parentActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(Map map)
+                    {
+                        Map form = (Map) map.get("fileExpressForm");
+                        //表单赋值
+                        tvTitle.setText((String) form.get("TITLE"));
+                        tvYjLeader.setText((String) form.get("LEADERID"));
+                        tvYjTime.setText((String) form.get("READTIME"));
+                        tvSyPeople.setText((String) form.get("SENDER"));
+                        tvSyTime.setText((String) form.get("SENDTIME"));
+                        tvContent.setText((String) form.get("CONTENT"));
+                        //生成附件按钮
+                        attachsList = (List<Map>) map.get("fileExpressAttachs");
+
+                        attachGridView.setAdapter(new attachButtonAdapter());
+                        attachGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+                            {
+                                String fileId = (String) attachsList.get(position).get("ATTACHID");
+                                String url = UrlConfigManager.findURL(getActivity(), "fileExpressAttachDown").get("url") + "?token=" + token + "&fileId=" + fileId;
+                                Intent intent = new Intent(getActivity(), PdfViewActivity.class);
+                                intent.putExtra("url", url);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                }));
     }
 
     class attachButtonAdapter extends BaseAdapter {
