@@ -2,9 +2,7 @@ package fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +12,10 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.tri.mobile.baselib.RxOkHttp.RxFunc1;
+import com.tri.mobile.baselib.RxOkHttp.RxOkHttpUtil;
+import com.tri.mobile.baselib.RxOkHttp.RxSubscriber;
 import com.tri.myfirstapp.R;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,21 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import activity.DisplayMessageActivity;
-import activity.LoginActivity;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
-import util.SmartUtil;
 import util.UrlConfigManager;
 
 /**
@@ -48,7 +34,7 @@ public class ListMessage extends Fragment {
     private ListView list = null;
     private List<Map<String, String>> infoList = null;
     private String token = null;
-    private CompositeSubscription mCompositeSubscription = null;
+    private CompositeSubscription cs = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -64,7 +50,7 @@ public class ListMessage extends Fragment {
             }
         });
         token = ((DisplayMessageActivity) getActivity()).sp.getString("token", "");
-        mCompositeSubscription = new CompositeSubscription();
+        cs = new CompositeSubscription();
         loadDataList();
         return view;
     }
@@ -73,75 +59,45 @@ public class ListMessage extends Fragment {
     public void onDestroy()
     {
         super.onDestroy();
-        mCompositeSubscription.unsubscribe();
+        cs.unsubscribe();
     }
 
     private void loadDataList()
     {
         final Activity parentActivity = getActivity();
-        mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<String>() {
+        Bundle args = getArguments();
+        Map<String, String> urlData = UrlConfigManager.findURL(parentActivity, "fileExpressList");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("token", token);
+        params.put("pageNum", args.getString("pageNum"));
+        params.put("pageSize", args.getString("pageSize"));
+        params.put("status", args.getString("status"));
+        RxOkHttpUtil.okHttpPost(cs, urlData.get("url"), params, new RxFunc1<Response, Map>() {
             @Override
-            public void call(final Subscriber<? super String> subscriber)
+            public Map call(Response response) throws IOException
             {
-                try
+                return JSON.parseObject(response.body().string(), Map.class);
+            }
+        }, new RxSubscriber<Map>() {
+            @Override
+            public void onError(Throwable e)
+            {
+            }
+
+            @Override
+            public void onNext(Map map)
+            {
+                if (map.containsKey("errorMsg"))
                 {
-                    Bundle args = getArguments();
-                    Map<String, String> urlData = UrlConfigManager.findURL(parentActivity, "fileExpressList");
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("token", token);
-                    params.put("pageNum", args.getString("pageNum"));
-                    params.put("pageSize", args.getString("pageSize"));
-                    params.put("status", args.getString("status"));
-                    final Call call = SmartUtil.okHttpPost(urlData.get("url"), params);
-                    subscriber.add(new SmartUtil.Subscription(call));
-                    call.enqueue(new SmartUtil.Callback(subscriber){
-                        @Override
-                        public void onResponse(Response response) throws IOException
-                        {
-                            subscriber.onNext(response.body().string());
-                        }
-                    });
-                } catch (IOException e)
+                    Toast.makeText(parentActivity, (String) map.get("errorMsg"), Toast.LENGTH_SHORT).show();
+                } else
                 {
-                    subscriber.onError(new Exception("网络无法连接"));
+                    infoList = (List<Map<String, String>>) map.get("fileExpList");
+                    SimpleAdapter sa = new SimpleAdapter(parentActivity, infoList, R.layout.listview_item, new String[]{"TITLE", "LEADERID", "SENDTIME"}, new int[]{R.id.tv1, R.id.tv2, R.id.tv3});
+                    list.setAdapter(sa);
                 }
             }
-        })
-                .map(new Func1<String, Map>() {
-                    @Override
-                    public Map call(String s)
-                    {
-                        return JSON.parseObject(s, Map.class);
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Map>() {
-                    @Override
-                    public void onCompleted()
-                    {
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        Toast.makeText(parentActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onNext(Map map)
-                    {
-                        if (map.containsKey("errorMsg"))
-                        {
-                            Toast.makeText(parentActivity, (String) map.get("errorMsg"), Toast.LENGTH_SHORT).show();
-                        } else
-                        {
-                            infoList = (List<Map<String, String>>) map.get("fileExpList");
-                            SimpleAdapter sa = new SimpleAdapter(parentActivity, infoList, R.layout.listview_item, new String[]{"TITLE", "LEADERID", "SENDTIME"}, new int[]{R.id.tv1, R.id.tv2, R.id.tv3});
-                            list.setAdapter(sa);
-                        }
-                    }
-                }));
+        });
     }
 
     public interface ItemClickCallBack {

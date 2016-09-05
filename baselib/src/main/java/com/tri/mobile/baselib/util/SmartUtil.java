@@ -1,4 +1,4 @@
-package util;
+package com.tri.mobile.baselib.util;
 
 import android.content.Context;
 
@@ -186,10 +186,10 @@ public class SmartUtil {
         return (int) (pxValue / scale + 0.5f);
     }
 
-    public static abstract class Callback implements okhttp3.Callback {
+    public static abstract class Callback<T> implements okhttp3.Callback {
         private Subscriber subscriber = null;
 
-        public Callback(Subscriber<? super String> subscriber)
+        public Callback(Subscriber<? super T> subscriber)
         {
             this.subscriber = subscriber;
         }
