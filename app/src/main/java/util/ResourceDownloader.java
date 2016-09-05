@@ -3,6 +3,8 @@ package util;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.tri.mobile.baselib.util.SmartUtil;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -98,9 +100,8 @@ public class ResourceDownloader extends AsyncTask<String, Long, ResourceDownload
             return new ResourceResult(true, file);
         }
 
-        OkHttpClient httpClient = new OkHttpClient();
-        call = httpClient.newCall(new Request.Builder().url(url).get().build());
         try {
+            call = SmartUtil.okHttpGet(url, null);
             Response response = call.execute();
             if (response.code() == 200) {
                 InputStream inputStream = null;

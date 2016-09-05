@@ -34,9 +34,8 @@ public class SmartUtil {
      * @param url    请求地址，http协议的地址
      * @param params 请求表单参数
      * @return Call
-     * @throws IOException
      */
-    public static Call okHttpPost(String url, Map<String, String> params) throws IOException
+    public static Call okHttpPost(String url, Map<String, String> params)
     {
         FormBody.Builder bodyBuilder = new FormBody.Builder();
         if (params != null && !params.isEmpty())
@@ -57,9 +56,8 @@ public class SmartUtil {
      * @param url    请求地址，http协议的地址
      * @param params 请求表单参数
      * @return Call
-     * @throws IOException
      */
-    public static Call okHttpGet(String url, Map<String, String> params) throws IOException
+    public static Call okHttpGet(String url, Map<String, String> params)
     {
         String urlStr = url;
         if (params != null && !params.isEmpty())

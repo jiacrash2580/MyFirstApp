@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.tri.mobile.baselib.RxOkHttp.RxFunc1;
 import com.tri.mobile.baselib.RxOkHttp.RxOkHttpUtil;
 import com.tri.mobile.baselib.RxOkHttp.RxSubscriber;
+import com.tri.mobile.baselib.context.RxAppCompatActivity;
 import com.tri.myfirstapp.R;
 
 import org.apache.commons.codec.binary.Base64;
@@ -28,15 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.Response;
-import rx.subscriptions.CompositeSubscription;
 import util.UrlConfigManager;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends RxAppCompatActivity {
     private EditText txtAccount = null;
     private EditText txtPassword = null;
     private Button btnLogin = null;
-    //这个是用来管理监听者和观察者关系的管理对象，用来在activity的onDestroy时，取消订阅者关系，释放资源，从而触发取消未结束的okhttp连接。
-    private CompositeSubscription mCompositeSubscription = new CompositeSubscription();
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -47,14 +45,6 @@ public class LoginActivity extends AppCompatActivity {
         findViews();
         //主要看这个方法，添加登录按钮点击事件
         addClickListner();
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        //结束所有添加到其中的订阅者的观察关系
-        mCompositeSubscription.unsubscribe();
     }
 
     /**
@@ -84,7 +74,8 @@ public class LoginActivity extends AppCompatActivity {
                 //构造请求参数
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("authToken", token);
-                RxOkHttpUtil.okHttpGet(mCompositeSubscription, urlData.get("url"), params, new RxFunc1<Response, Map>() {
+
+                RxOkHttpUtil.okHttpGet(LoginActivity.this, urlData.get("url"), params, new RxFunc1<Response, Map>() {
                     @Override
                     public Map call(Response response) throws IOException
                     {

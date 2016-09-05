@@ -1,7 +1,6 @@
 package fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,7 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.tri.mobile.baselib.RxOkHttp.RxFunc1;
 import com.tri.mobile.baselib.RxOkHttp.RxOkHttpUtil;
 import com.tri.mobile.baselib.RxOkHttp.RxSubscriber;
-import com.tri.mobile.baselib.util.SmartUtil;
+import com.tri.mobile.baselib.context.RxFragment;
 import com.tri.myfirstapp.R;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,20 +31,13 @@ import java.util.Map;
 
 import activity.DisplayMessageActivity;
 import activity.PdfViewActivity;
-import okhttp3.Call;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import util.UrlConfigManager;
 
 /**
  * Created by aaa on 2016/7/28.
  */
-public class DetailMessage extends Fragment {
+public class DetailMessage extends RxFragment {
     private TextView tvTitle = null;
     private TextView tvYjLeader = null;
     private TextView tvYjTime = null;
@@ -54,7 +46,6 @@ public class DetailMessage extends Fragment {
     private TextView tvContent = null;
     private GridView attachGridView = null;
     private List<Map> attachsList = null;
-    private CompositeSubscription mCompositeSubscription = new CompositeSubscription();
     private String token = null;
 
     @Nullable
@@ -86,7 +77,7 @@ public class DetailMessage extends Fragment {
     {
         final Activity parentActivity = getActivity();
         InputStream is = parentActivity.getResources().openRawResource(R.raw.kyfw12306);
-        RxOkHttpUtil.okHttpsPost(mCompositeSubscription, "https://kyfw.12306.cn/otn/", null, is, new RxFunc1<Response, String>() {
+        RxOkHttpUtil.okHttpsPost(this, "https://kyfw.12306.cn/otn/", null, is, new RxFunc1<Response, String>() {
             @Override
             public String call(Response response) throws IOException
             {
@@ -108,13 +99,6 @@ public class DetailMessage extends Fragment {
         });
     }
 
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        mCompositeSubscription.unsubscribe();
-    }
-
     private void loadDataDetail()
     {
         final Activity parentActivity = getActivity();
@@ -124,7 +108,7 @@ public class DetailMessage extends Fragment {
         Map<String, String> params = new HashMap<String, String>();
         params.put("token", token);
         params.put("id", args.getString("id"));
-        RxOkHttpUtil.okHttpPost(mCompositeSubscription, urlData.get("url"), params, new RxFunc1<Response, Map>() {
+        RxOkHttpUtil.okHttpPost(this, urlData.get("url"), params, new RxFunc1<Response, Map>() {
             @Override
             public Map call(Response response) throws IOException
             {

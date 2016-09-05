@@ -1,7 +1,6 @@
 package fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.tri.mobile.baselib.RxOkHttp.RxFunc1;
 import com.tri.mobile.baselib.RxOkHttp.RxOkHttpUtil;
 import com.tri.mobile.baselib.RxOkHttp.RxSubscriber;
+import com.tri.mobile.baselib.context.RxFragment;
 import com.tri.myfirstapp.R;
 
 import java.io.IOException;
@@ -24,17 +24,15 @@ import java.util.Map;
 
 import activity.DisplayMessageActivity;
 import okhttp3.Response;
-import rx.subscriptions.CompositeSubscription;
 import util.UrlConfigManager;
 
 /**
  * Created by aaa on 2016/7/28.
  */
-public class ListMessage extends Fragment {
+public class ListMessage extends RxFragment {
     private ListView list = null;
     private List<Map<String, String>> infoList = null;
     private String token = null;
-    private CompositeSubscription cs = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -50,16 +48,8 @@ public class ListMessage extends Fragment {
             }
         });
         token = ((DisplayMessageActivity) getActivity()).sp.getString("token", "");
-        cs = new CompositeSubscription();
         loadDataList();
         return view;
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        cs.unsubscribe();
     }
 
     private void loadDataList()
@@ -72,7 +62,8 @@ public class ListMessage extends Fragment {
         params.put("pageNum", args.getString("pageNum"));
         params.put("pageSize", args.getString("pageSize"));
         params.put("status", args.getString("status"));
-        RxOkHttpUtil.okHttpPost(cs, urlData.get("url"), params, new RxFunc1<Response, Map>() {
+
+        RxOkHttpUtil.okHttpPost(this, urlData.get("url"), params, new RxFunc1<Response, Map>() {
             @Override
             public Map call(Response response) throws IOException
             {
@@ -82,6 +73,7 @@ public class ListMessage extends Fragment {
             @Override
             public void onError(Throwable e)
             {
+                Toast.makeText(parentActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
